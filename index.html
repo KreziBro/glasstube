@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GlassTube</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Unbounded:wght@600&display=swap">
+<style>
+:root{
+  --text:#1c1c21; --muted:rgba(28,28,33,.62);
+  --glass:rgba(255,255,255,.55); --glass-hi:rgba(255,255,255,.85);
+  --edge:rgba(255,255,255,.95); --ring:rgba(30,30,45,.07);
+  --shadow:0 12px 40px rgba(60,60,80,.14);
+  --bg1:#fbfbfc; --bg2:#c9ccd3; --blob1:#ffffff; --blob2:#aeb2bc; --blob3:#e3e5e9;
+  --accent:#2a2b31;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--text:#f2f2f5;--muted:rgba(242,242,245,.64);--glass:rgba(255,255,255,.08);--glass-hi:rgba(255,255,255,.15);--edge:rgba(255,255,255,.2);--ring:rgba(255,255,255,.04);--shadow:0 12px 40px rgba(0,0,0,.4);--bg1:#2d2f36;--bg2:#0e0f12;--blob1:#7b7f8b;--blob2:#3b3e47;--blob3:#9a9eaa;--accent:#f2f2f5}
+}
+:root[data-theme="dark"]{--text:#f2f2f5;--muted:rgba(242,242,245,.64);--glass:rgba(255,255,255,.08);--glass-hi:rgba(255,255,255,.15);--edge:rgba(255,255,255,.2);--ring:rgba(255,255,255,.04);--shadow:0 12px 40px rgba(0,0,0,.4);--bg1:#2d2f36;--bg2:#0e0f12;--blob1:#7b7f8b;--blob2:#3b3e47;--blob3:#9a9eaa;--accent:#f2f2f5}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;font:500 14px/1.4 Onest,system-ui,sans-serif;color:var(--text);background:linear-gradient(135deg,var(--bg1),var(--bg2)) fixed;overflow-x:hidden}
+.blobs{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.blobs i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.7}
+.blobs i:nth-child(1){width:46vmax;height:46vmax;background:var(--blob1);left:-12vmax;top:-10vmax;opacity:.9}
+.blobs i:nth-child(2){width:44vmax;height:44vmax;background:var(--blob2);right:-10vmax;top:18vh;opacity:.6}
+.blobs i:nth-child(3){width:38vmax;height:38vmax;background:var(--blob3);left:25vw;bottom:-18vmax;opacity:.8}
+.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.logo b .i{width:13px;height:13px}
+nav a>span:first-child{display:grid;place-items:center}
+.like.on .i{fill:currentColor}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.glass{background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);box-shadow:var(--shadow),0 0 0 1px var(--ring),inset 0 1px 0 rgba(255,255,255,.35)}
+.ctrl.glass{background:rgba(24,24,30,.45);border-color:rgba(255,255,255,.22)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;transition:background .2s}
+.btn:hover{background:var(--glass-hi)}
+.icon{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:18px;transition:background .2s}
+.icon:hover{background:var(--glass-hi)}
+
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;margin:12px;padding:8px 12px;border-radius:22px;display:flex;align-items:center;gap:12px}
+.logo{display:flex;align-items:center;gap:8px;font:600 17px Unbounded,sans-serif;letter-spacing:-.02em}
+.logo b{width:32px;height:24px;border-radius:8px;background:var(--accent);display:grid;place-items:center;font-size:10px;color:var(--bg1);box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.search{flex:1;max-width:560px;margin:0 auto;display:flex;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.07);border:1px solid var(--edge)}
+.search input{flex:1;min-width:0;background:none;border:0;color:var(--text);font:inherit;padding:10px 18px}
+.search input::placeholder{color:var(--muted)}
+.search input:focus{outline:0}
+.search button{padding:0 20px;background:var(--glass);border-left:1px solid var(--edge)}
+.right{display:flex;align-items:center;gap:4px}
+.ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#ffb86b,#ff4f8b 60%,#6a5cff);flex:none}
+
+.shell{display:flex;gap:12px;padding:0 12px 24px;align-items:flex-start}
+nav{position:sticky;top:calc(80px + env(safe-area-inset-top,0px));width:220px;flex:none;border-radius:22px;padding:10px;transition:width .25s}
+nav a{display:flex;align-items:center;gap:14px;padding:10px 12px;border-radius:14px;color:inherit;text-decoration:none;white-space:nowrap;overflow:hidden}
+nav a:hover{background:var(--glass-hi)}
+nav a.on{background:var(--glass-hi);box-shadow:inset 0 0 0 1px var(--edge)}
+nav a span:first-child{font-size:18px;width:22px;text-align:center;flex:none}
+nav hr{border:0;border-top:1px solid var(--edge);margin:8px 4px}
+body.mini nav{width:68px}
+main{flex:1;min-width:0}
+
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 14px;scrollbar-width:none}
+.chip{padding:8px 15px;border-radius:12px;white-space:nowrap;background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:background .2s}
+.chip:hover{background:var(--glass-hi)}
+.chip.on{background:var(--text);color:var(--bg1)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.card{border-radius:22px;padding:8px 8px 14px;text-align:left;display:block;width:100%;transition:transform .2s,background .2s}
+.card:hover{transform:translateY(-3px);background:var(--glass-hi)}
+.thumb{position:relative;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,var(--a),var(--b))}
+.thumb::before{content:"";position:absolute;width:60%;aspect-ratio:1;border-radius:50%;right:-12%;top:-30%;background:rgba(255,255,255,.28);filter:blur(6px)}
+.thumb::after{content:"";position:absolute;width:46%;aspect-ratio:1;border-radius:30%;left:8%;bottom:-24%;background:rgba(0,0,0,.22);transform:rotate(25deg)}
+.dur{position:absolute;right:8px;bottom:8px;z-index:1;padding:2px 8px;border-radius:8px;font-size:12px;background:rgba(15,10,40,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff}
+.meta{display:flex;gap:10px;padding:12px 6px 0}
+.meta .ava{background:linear-gradient(135deg,var(--a),var(--b))}
+.meta h3{margin:0 0 2px;font-size:15px;font-weight:600;line-height:1.3}
+.meta p{margin:0;color:var(--muted);font-size:13px}
+
+#watch{display:none}
+body.watching #home{display:none}
+body.watching #watch{display:grid}
+#watch{grid-template-columns:minmax(0,1fr) 340px;gap:14px}
+.player{border-radius:24px;padding:8px}
+.screen{position:relative;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:linear-gradient(135deg,var(--a),var(--b))}
+.screen::before{content:"";position:absolute;width:50%;aspect-ratio:1;border-radius:50%;right:6%;top:-20%;background:rgba(255,255,255,.3);filter:blur(10px)}
+.ctrl{position:absolute;left:12px;right:12px;bottom:12px;border-radius:18px;padding:10px 14px;display:flex;align-items:center;gap:10px}
+.ctrl .bar{flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,.25);position:relative;overflow:hidden}
+.ctrl .bar i{position:absolute;inset:0 62% 0 0;background:#fff;border-radius:99px;}
+.ctrl span{font-size:12px;color:#fff;font-variant-numeric:tabular-nums}
+.ctrl .icon{color:#fff;width:34px;height:34px}
+.info{border-radius:22px;padding:16px;margin-top:14px}
+.info h1{margin:0 0 12px;font-size:20px;line-height:1.3}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.row .grow{flex:1;min-width:140px}
+.row small{display:block;color:var(--muted);font-size:12px}
+.pill{background:var(--glass-hi);border:1px solid var(--edge)}
+.sub.on{background:var(--text);color:var(--bg1)}
+.like.on{background:var(--accent);color:var(--bg1)}
+.desc{margin-top:14px;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.07);color:var(--muted)}
+.comments{margin-top:14px;padding:16px;border-radius:22px}
+.comments h2{margin:0 0 14px;font-size:16px}
+.cm{display:flex;gap:10px;margin-bottom:14px}
+.cm p{margin:0;color:var(--muted)}
+.cm b{color:var(--text)}
+.side{display:flex;flex-direction:column;gap:10px}
+.mini-card{display:flex;gap:10px;padding:8px;border-radius:18px;text-align:left;width:100%}
+.mini-card .thumb{width:150px;flex:none;border-radius:12px}
+.mini-card h3{margin:0 0 4px;font-size:14px;font-weight:600;line-height:1.3}
+.mini-card p{margin:0;color:var(--muted);font-size:12px}
+
+.overlay{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(20,20,30,.32);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.overlay[hidden]{display:none}
+.dlg{width:min(460px,100%);border-radius:26px;padding:18px;background:var(--glass-hi);animation:pop .22s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+.dh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.dh h2{margin:0;font-size:18px}
+.apps{overscroll-behavior-x:contain;display:flex;gap:14px;overflow-x:auto;padding:4px 2px 14px;scrollbar-width:none}
+.app{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:none;width:64px}
+.ac{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;background:var(--glass);border:1px solid var(--edge);color:var(--text);transition:transform .2s,background .2s}
+.app:hover .ac{transform:translateY(-2px);background:var(--glass-hi)}
+.ac .i{width:22px;height:22px}
+.linkbox{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 16px;border-radius:16px;background:rgba(128,128,140,.14);border:1px solid var(--edge)}
+.linkbox input{flex:1;min-width:0;background:none;border:0;color:var(--text);font:inherit;padding:8px 0;text-overflow:ellipsis}
+.linkbox input:focus{outline:0}
+.cp{background:var(--text);color:var(--bg1);border-radius:12px}
+.cp:hover{background:var(--text);opacity:.88}
+.start{display:flex;align-items:center;gap:10px;margin-top:14px;cursor:pointer;user-select:none}
+.start input{position:absolute;opacity:0}
+.sw{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;border:1.5px solid var(--muted);color:transparent;transition:background .15s}
+.sw .i{width:16px;height:16px;stroke-width:2.4}
+.start input:checked+.sw{background:var(--text);border-color:var(--text);color:var(--bg1)}
+.start input:focus-visible+.sw{outline:2px solid var(--text);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.dlg{animation:none}}
+@media (max-width:1000px){#watch{grid-template-columns:1fr}}
+@media (max-width:760px){
+  nav{display:none}
+  header{margin:8px;gap:6px}
+  .logo span{display:none}
+  .right .hide-s{display:none}
+  .shell{padding:0 8px 24px}
+  .mini-card .thumb{width:130px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+<symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+<symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15zM10 21h4"/></symbol>
+<symbol id="theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/></symbol>
+<symbol id="home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></symbol>
+<symbol id="bolt" viewBox="0 0 24 24"><path d="M13 3L5 13.5h6L10 21l8-10.5h-6z"/></symbol>
+<symbol id="subs" viewBox="0 0 24 24"><rect x="4" y="9" width="16" height="11" rx="2.5"/><path d="M7 5h10"/></symbol>
+<symbol id="history" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8L4 8.5M4 4v4.5h4.5M12 8v4l3 2"/></symbol>
+<symbol id="list" viewBox="0 0 24 24"><path d="M4 6h12M4 11h12M4 16h6M15 14v6l5-3z"/></symbol>
+<symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+<symbol id="heart" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.5 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></symbol>
+<symbol id="pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/></symbol>
+<symbol id="vol" viewBox="0 0 24 24"><path d="M4 10v4h3.5L12 18V6L7.5 10zM15.5 9a4 4 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11"/></symbol>
+<symbol id="full" viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></symbol>
+<symbol id="share" viewBox="0 0 24 24"><path d="M4 19v-2a6 6 0 0 1 6-6h10M16 6l5 5-5 5"/></symbol>
+<symbol id="play" viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z" fill="currentColor" stroke="none"/></symbol>
+<symbol id="close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="code" viewBox="0 0 24 24"><path d="M8.5 7L3.5 12l5 5M15.5 7l5 5-5 5M13.5 5l-3 14"/></symbol>
+<symbol id="send" viewBox="0 0 24 24"><path d="M21 4L3 11l7 2.5L12.5 21zM10 13.5L21 4"/></symbol>
+<symbol id="chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></symbol>
+<symbol id="mail" viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="M4 7l8 6 8-6"/></symbol>
+<symbol id="qr" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2.5v2.5M20 14v.01M14 20h2.5M20 17v3h-1.5"/></symbol>
+<symbol id="link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+<symbol id="check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+</defs></svg>
+<div class="blobs" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<header class="glass">
+  <button class="icon" id="burger" aria-label="Меню"><svg class="i" aria-hidden="true"><use href="#menu"/></svg></button>
+  <button class="logo" id="logo" aria-label="Главная"><b><svg class="i" aria-hidden="true"><use href="#play"/></svg></b><span>GlassTube</span></button>
+  <form class="search" onsubmit="return false" role="search">
+    <input type="search" placeholder="Поиск" aria-label="Поиск">
+    <button aria-label="Найти"><svg class="i" aria-hidden="true"><use href="#search"/></svg></button>
+  </form>
+  <div class="right">
+    <button class="btn hide-s"><svg class="i" aria-hidden="true"><use href="#plus"/></svg> Создать</button>
+    <button class="icon hide-s" aria-label="Уведомления"><svg class="i" aria-hidden="true"><use href="#bell"/></svg></button>
+    <button class="icon" id="theme" aria-label="Сменить тему"><svg class="i" aria-hidden="true"><use href="#theme"/></svg></button>
+    <div class="ava" aria-label="Профиль"></div>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="glass" aria-label="Разделы">
+    <a href="#" class="on"><span><svg class="i" aria-hidden="true"><use href="#home"/></svg></span><span>Главная</span></a>
+    <a href="#"><span><svg class="i" aria-hidden="true"><use href="#bolt"/></svg></span><span>Shorts</span></a>
+    <a href="#"><span><svg class="i" aria-hidden="true"><use href="#subs"/></svg></span><span>Подписки</span></a>
+    <hr>
+    <a href="#"><span><svg class="i" aria-hidden="true"><use href="#history"/></svg></span><span>История</span></a>
+    <a href="#"><span><svg class="i" aria-hidden="true"><use href="#list"/></svg></span><span>Плейлисты</span></a>
+    <a href="#"><span><svg class="i" aria-hidden="true"><use href="#clock"/></svg></span><span>Смотреть позже</span></a>
+    <a href="#"><span><svg class="i" aria-hidden="true"><use href="#heart"/></svg></span><span>Понравившиеся</span></a>
+  </nav>
+
+  <main>
+    <section id="home">
+      <div class="chips" id="chips"></div>
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <section id="watch">
+      <div>
+        <div class="player glass">
+          <div class="screen" id="screen">
+            <div class="ctrl glass">
+              <button class="icon" aria-label="Пауза"><svg class="i" aria-hidden="true"><use href="#pause"/></svg></button>
+              <span>4:18</span>
+              <div class="bar"><i></i></div>
+              <span>11:42</span>
+              <button class="icon" aria-label="Громкость"><svg class="i" aria-hidden="true"><use href="#vol"/></svg></button>
+              <button class="icon" aria-label="Во весь экран"><svg class="i" aria-hidden="true"><use href="#full"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <div class="info glass">
+          <h1 id="wtitle"></h1>
+          <div class="row">
+            <div class="ava" id="wava"></div>
+            <div class="grow"><b id="wch"></b><small>1,2 млн подписчиков</small></div>
+            <button class="btn pill sub" id="sub">Подписаться</button>
+            <button class="btn pill like" id="like"><svg class="i" aria-hidden="true"><use href="#heart"/></svg> <span id="lc">48 тыс.</span></button>
+            <button class="btn pill" id="shareBtn"><svg class="i" aria-hidden="true"><use href="#share"/></svg> Поделиться</button>
+          </div>
+          <div class="desc"><b style="color:var(--text)">312 тыс. просмотров · 2 дня назад</b><br>Разбираем всё по шагам: от идеи до готового результата. Таймкоды и ссылки ниже.</div>
+        </div>
+        <div class="comments glass">
+          <h2>Комментарии · 1 284</h2>
+          <div class="cm"><div class="ava" style="background:linear-gradient(135deg,#19d3c5,#6a5cff)"></div><div><b>mira_k</b><p>Лучшее объяснение, которое я видела. Сохранила на потом.</p></div></div>
+          <div class="cm"><div class="ava" style="background:linear-gradient(135deg,#ffb86b,#ff4f8b)"></div><div><b>dmitry.w</b><p>На 7:20 самое важное — перемотайте, если спешите.</p></div></div>
+          <div class="cm"><div class="ava" style="background:linear-gradient(135deg,#6a5cff,#ff4f8b)"></div><div><b>nikita</b><p>Подписался. Ждём продолжение!</p></div></div>
+        </div>
+      </div>
+      <aside class="side" id="side" aria-label="Рекомендации"></aside>
+    </section>
+  </main>
+</div>
+
+<div class="overlay" id="ov" hidden>
+  <div class="dlg glass" role="dialog" aria-modal="true" aria-labelledby="dt">
+    <div class="dh"><h2 id="dt">Поделиться</h2><button class="icon" id="dx" aria-label="Закрыть"><svg class="i" aria-hidden="true"><use href="#close"/></svg></button></div>
+    <div class="apps"><button class="app"><span class="ac"><svg class="i" aria-hidden="true"><use href="#code"/></svg></span><span>Встроить</span></button><button class="app"><span class="ac"><svg class="i" aria-hidden="true"><use href="#send"/></svg></span><span>Telegram</span></button><button class="app"><span class="ac"><svg class="i" aria-hidden="true"><use href="#chat"/></svg></span><span>Сообщение</span></button><button class="app"><span class="ac"><svg class="i" aria-hidden="true"><use href="#mail"/></svg></span><span>Почта</span></button><button class="app"><span class="ac"><svg class="i" aria-hidden="true"><use href="#qr"/></svg></span><span>QR-код</span></button><button class="app"><span class="ac"><svg class="i" aria-hidden="true"><use href="#link"/></svg></span><span>Ссылка</span></button></div>
+    <div class="linkbox"><input id="lnk" readonly aria-label="Ссылка на видео"><button class="btn cp" id="cp">Копировать</button></div>
+    <label class="start"><input type="checkbox" id="st"><span class="sw"><svg class="i" aria-hidden="true"><use href="#check"/></svg></span><span>Начать с 4:18</span></label>
+  </div>
+</div>
+<script>
+const V=[
+["Как собрать мощный ПК в 2026 году","TechForge","412 тыс.","3 дня","12:04","#ff4f8b","#6a5cff"],
+["Ночной Токио: прогулка в дождь","Wander Lens","1,8 млн","2 нед.","48:20","#19d3c5","#1b4fd8"],
+["Python за 20 минут: самое нужное","CodeLane","905 тыс.","1 мес.","20:11","#ffb86b","#ff4f8b"],
+["Lo-fi для работы и учёбы","Quiet Hours","6,3 млн","1 год","3:02:00","#6a5cff","#19d3c5"],
+["Почему небо голубое: опыт дома","Наука просто","220 тыс.","5 дней","9:37","#4fd1ff","#6a5cff"],
+["Готовим рамен с нуля","Кухня Лины","730 тыс.","1 нед.","15:45","#ff7a59","#ff4f8b"],
+["Обзор нового смартфона за 10 минут","GadgetPulse","1,1 млн","Вчера","10:03","#8f7bff","#19d3c5"],
+["Тренировка дома без инвентаря","FitFlow","340 тыс.","4 дня","25:30","#19d3c5","#a6e22e"],
+["Как устроен интернет: от кабеля до сайта","Сеть изнутри","510 тыс.","3 нед.","18:22","#1b4fd8","#ff4f8b"]
+];
+const C=["Все","Музыка","Технологии","Игры","Кулинария","Путешествия","Наука","Новое для вас","Просмотрено"];
+const $=s=>document.querySelector(s);
+const thumbVars=v=>`--a:${v[5]};--b:${v[6]}`;
+$("#chips").innerHTML=C.map((c,i)=>`<button class="chip${i?"":" on"}">${c}</button>`).join("");
+$("#chips").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;document.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x===b))};
+$("#grid").innerHTML=V.map((v,i)=>`<button class="card glass" data-i="${i}" style="${thumbVars(v)}"><div class="thumb"><span class="dur">${v[4]}</span></div><div class="meta"><div class="ava"></div><div><h3>${v[0]}</h3><p>${v[1]}</p><p>${v[2]} просмотров · ${v[3]} назад</p></div></div></button>`.replace("Вчера назад","Вчера").replace("назад назад","назад")).join("");
+function open(i){cur=i;
+  const v=V[i];
+  $("#screen").style.cssText=thumbVars(v);
+  $("#wava").style.cssText=`background:linear-gradient(135deg,${v[5]},${v[6]})`;
+  $("#wtitle").textContent=v[0];$("#wch").textContent=v[1];
+  $("#side").innerHTML=V.map((u,j)=>j===i?"":`<button class="mini-card glass" data-i="${j}" style="${thumbVars(u)}"><div class="thumb"><span class="dur">${u[4]}</span></div><div><h3>${u[0]}</h3><p>${u[1]}</p><p>${u[2]} просмотров</p></div></button>`).join("");
+  document.body.classList.add("watching");scrollTo(0,0);
+}
+document.addEventListener("click",e=>{const c=e.target.closest("[data-i]");if(c)open(+c.dataset.i)});
+$("#logo").onclick=()=>document.body.classList.remove("watching");
+$("#burger").onclick=()=>document.body.classList.toggle("mini");
+$("#sub").onclick=e=>{const on=e.currentTarget.classList.toggle("on");e.currentTarget.textContent=on?"Вы подписаны":"Подписаться"};
+$("#like").onclick=e=>{const on=e.currentTarget.classList.toggle("on");$("#lc").textContent=on?"48,1 тыс.":"48 тыс."};
+$("#theme").onclick=()=>{const r=document.documentElement,d=matchMedia("(prefers-color-scheme:dark)").matches;const cur=r.dataset.theme||(d?"dark":"light");r.dataset.theme=cur==="dark"?"light":"dark"};
+let cur=0;const IDS=["x7Kq2mPaL0c","Tk9vR3nWq1A","pY4dH8sUe2M","L0fiBr7aNcQ","sKy5GhT2xZw","rA1mEn6VoJd","Wq8ZcP3uYtB","fH2oLk9Dm5S","uN6vXe4TaGj"];
+const ov=$("#ov"),lnk=$("#lnk"),st=$("#st"),cp=$("#cp");
+const url=()=>"https://glasstube.app/watch?v="+IDS[cur]+(st.checked?"&t=258s":"");
+function openShare(){lnk.value=url();cp.textContent="Копировать";ov.hidden=false;document.body.style.overflow="hidden";$("#dx").focus()}
+function closeShare(){ov.hidden=true;document.body.style.overflow="";$("#shareBtn").focus()}
+$("#shareBtn").onclick=openShare;$("#dx").onclick=closeShare;
+ov.onclick=e=>{if(e.target===ov)closeShare()};
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!ov.hidden)closeShare()});
+st.onchange=()=>{lnk.value=url();cp.textContent="Копировать"};
+cp.onclick=async()=>{try{await navigator.clipboard.writeText(lnk.value)}catch(_){lnk.select();try{document.execCommand("copy")}catch(__){}}cp.textContent="Скопировано"};
+const apps=document.querySelector(".apps");
+ov.addEventListener("wheel",e=>e.preventDefault(),{passive:false});
+apps.addEventListener("wheel",e=>{if(apps.scrollWidth<=apps.clientWidth||Math.abs(e.deltaY)<Math.abs(e.deltaX))return;const max=apps.scrollWidth-apps.clientWidth,next=apps.scrollLeft+e.deltaY;e.preventDefault();apps.scrollLeft=Math.max(0,Math.min(max,next))},{passive:false});
+</script>
+</body>
+</html>
